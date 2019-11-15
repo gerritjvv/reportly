@@ -1,13 +1,19 @@
 
 # Display
 
+
+## Layout 
+
 For layouts go here: https://bulma.io/documentation/layout/tiles/
 
 https://bulma.io/documentation/components/list/
 
 https://couds.github.io/react-bulma-components/?path=/story/list--default
     
+## Drop and drag
 
+https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/about/installation.md
+ 
 # Build
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
