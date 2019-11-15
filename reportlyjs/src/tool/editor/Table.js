@@ -2,12 +2,17 @@ import React from 'react';
 
 import 'react-bulma-components/dist/react-bulma-components.min.css';
 
+const styles = {
+    overflow: 'hidden',
+    'text-overflow': 'ellipsis',
+}
+
 const renderHeaderCol = (column, index) => {
-    return <th key={index}>{column}</th>
+    return <th style={styles} className="has-max-width-200" key={index}>{column}</th>
 };
 
 const renderRowValue = (v, index) => {
-    return <td key={index}>{v}</td>
+    return <td style={styles} className="has-max-width-200 is-scrollable" key={index}>{v}</td>
 };
 
 const renderHeader = (columns) => {
@@ -31,7 +36,8 @@ const renderRows = (data) => {
 const table = (props) => {
     return (
         <div className="table-container">
-            <table className="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+            <table className="table is-bordered is-striped is-narrow is-scrollable is-hoverable is-fullwidth"
+            >
                 {renderHeader(props.data.columns)}
                 {renderRows(props.data.data)}
             </table>

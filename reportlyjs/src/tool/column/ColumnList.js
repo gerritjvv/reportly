@@ -7,7 +7,7 @@ import Column from "./Column";
 const ColumnList = (props) => {
 
     return (
-        <div className="list is-hoverable LeftMenu">
+        <div className="list is-hoverable">
             {props.columns.map((c) => <Column key={c.key} column={c}/>)}
         </div>
     );

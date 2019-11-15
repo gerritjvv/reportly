@@ -3,3 +3,9 @@ ColumnIsDragging {
     opacity: 0.5;
     cursor: move;
 }
+
+
+ColumnOverflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
