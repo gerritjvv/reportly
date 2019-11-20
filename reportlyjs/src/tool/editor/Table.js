@@ -4,7 +4,7 @@ import 'react-bulma-components/dist/react-bulma-components.min.css';
 
 const styles = {
     overflow: 'hidden',
-    'text-overflow': 'ellipsis',
+    textOverflow: 'ellipsis',
 }
 
 const renderHeaderCol = (column, index) => {
@@ -39,7 +39,7 @@ const table = (props) => {
             <table className="table is-bordered is-striped is-narrow is-scrollable is-hoverable is-fullwidth"
             >
                 {renderHeader(props.data.columns)}
-                {renderRows(props.data.data)}
+                {renderRows(props.data.rows)}
             </table>
         </div>
     );

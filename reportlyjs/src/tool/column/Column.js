@@ -32,7 +32,7 @@ const Column = (props) => {
 
     const styles = {
         overflow: 'hidden',
-        'text-overflow': 'ellipsis',
+        textOverflow: 'ellipsis',
     }
 
     return (
