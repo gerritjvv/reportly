@@ -18,9 +18,21 @@ export const ROWS_LOAD = "ROWS_LOAD";
 export const ROWS_LOADED = "ROWS_LOADED";
 export const ROWS_LOAD_ERROR = "ROWS_LOAD_ERROR";
 
+export const QUERY_COLUMN_ADD = "QUERY_COLUMN_ADD";
+export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
+
 /*
  Action creators
  */
+export const addQueryColumn = (columnKey) => ({
+   type: QUERY_COLUMN_ADD,
+   columnKey: columnKey,
+});
+
+export const removeQueryColumn = (columnKey) => ({
+    type: QUERY_COLUMN_REMOVE,
+    columnKey: columnKey,
+});
 
 // load data source ids and names
 export const loadDataSources = () => ({

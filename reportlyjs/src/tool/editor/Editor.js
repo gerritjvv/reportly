@@ -2,7 +2,8 @@ import React from 'react';
 import 'react-bulma-components/dist/react-bulma-components.min.css';
 import 'bulma-helpers/css/bulma-helpers.min.css';
 
-import {getColumns, getSelectedColumns, getData} from '../../store/selectors';
+import {getDataSourceStateFromStore, getShowableColumns, getSelectedColumns, getData} from '../../store/selectors';
+import {addQueryColumn, removeQueryColumn} from '../../store/actions';
 
 import './Editor.css';
 
@@ -28,7 +29,7 @@ const BuilderArea = ({
             columnListAcceptNewQueryColumn(v.column);
         },
         canDrop: (v, monitor) => {
-            return queryColumns.find( i => i.key === v.column.key)
+            return queryColumns.find(i => i.key === v.column.key)
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
@@ -44,7 +45,7 @@ const BuilderArea = ({
             tableAreaAcceptNewQueryColumn(v.column);
         },
         canDrop: (v, monitor) => {
-            return columns.find( i => i.key === v.column.key)
+            return columns.find(i => i.key === v.column.key)
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
@@ -76,38 +77,12 @@ const BuilderArea = ({
 
 class Editor extends React.Component {
 
-    columnListAcceptNewQueryColumn = (column) => {
-        // console.log("Reveiced new column columnListAcceptNewQueryColumn ");
-        // console.log(column);
-        //
-        // const queryColumns = this.state.queryColumns.filter(c => c.key !== column.key);
-        // const columns = [...this.state.columns, column];
-        //
-        // this.setState({
-        //     queryColumns: queryColumns,
-        //     columns: [...new Set(columns)],
-        // });
-    }
-
-    tableAreaAcceptNewQueryColumn = (column) => {
-        // console.log("Reveiced new column ");
-        // console.log(column);
-        //
-        // const columns = this.state.columns.filter(c => c.key !== column.key);
-        // const queryColumns = [...this.state.queryColumns, column];
-        //
-        // this.setState({
-        //     queryColumns: [...new Set(queryColumns)],
-        //     columns: columns,
-        // });
-    };
-
     render() {
         return (
             <DndProvider backend={HTML5Backend}>
                 <BuilderArea
-                    tableAreaAcceptNewQueryColumn={this.tableAreaAcceptNewQueryColumn}
-                    columnListAcceptNewQueryColumn={this.columnListAcceptNewQueryColumn}
+                    tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
+                    columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
                     queryColumns={this.props.queryColumns}
                     columns={this.props.columns}
                     data={this.props.data}
@@ -121,11 +96,25 @@ class Editor extends React.Component {
 
 // redux map the store values to the props of Editor
 const mapStateToProps = store => {
-  return {
-      columns: getColumns(store),
-      queryColumns: getSelectedColumns(store),
-      data: getData(store),
-  };
+
+    const state = getDataSourceStateFromStore(store);
+
+    console.log("Editor.mapSTateToProps");
+    console.log(state);
+
+
+    return {
+        columns: getShowableColumns(state),
+        queryColumns: getSelectedColumns(state),
+        data: getData(state),
+    };
 };
 
-export default connect(mapStateToProps)(Editor);
+const mapDispatchToProps = dispatch => {
+    return {
+        tableAreaAcceptNewQueryColumn: column => dispatch(addQueryColumn(column.key)),
+        columnListAcceptNewQueryColumn: column => dispatch(removeQueryColumn(column.key)),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Editor);
