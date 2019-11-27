@@ -1,0 +1,39 @@
+version: '3.2'
+
+services:
+  reportly-graph:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    privileged: true
+    volumes:
+    - nfsmount:/app
+    - ~/.m2:/root/.m2/:cached
+    # we need to mount in the docker sock to run docker images for tests reliably from dockerd
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      AWS_REGION: "eu-west-1"
+      PORT: 3000
+      DATABASE_URL: "jdbc:postgresql://postgresd/reportly?user=test&password=test"
+    depends_on:
+    - postgresd
+    links:
+    - postgresd:postgres
+    ports:
+    - "3000:3000"
+  postgresd:
+    image: postgres:9.6
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: reportly
+volumes:
+  postgresvolume10:
+  nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":${SOURCE_DIR}"

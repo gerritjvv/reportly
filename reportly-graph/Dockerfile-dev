@@ -1,0 +1,13 @@
+FROM clojure:openjdk-14-lein-slim-buster
+
+WORKDIR /tmp
+
+
+ENV PATH=$PATH:$LEIN_INSTALL
+ENV LEIN_ROOT 1
+
+WORKDIR /app
+
+EXPOSE 3000
+
+CMD "bash"
