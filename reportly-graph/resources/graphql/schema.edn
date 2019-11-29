@@ -1,25 +1,84 @@
 {:enums
- {:episode
-  {:description "The episodes of the original Star Wars trilogy."
-   :values [:NEWHOPE :EMPIRE :JEDI]}}
+         {:data_source_type
+          {:description "The type of datasource"
+           :values      [:DB :API]}
+
+          :db_type
+          {:description "The type of database"
+           :values      [:MYSQL :POSTGRES]}
+
+          :episode
+          {:description "The episodes of the original Star Wars trilogy."
+           :values      [:NEWHOPE :EMPIRE :JEDI]}}
+
+
+ :unions {
+          :data_source  {:members [:db_data_source :api_data_source]}
+          :data_request {:members [:db_data_request]}
+
+          }
 
  :objects
- {:droid
-  {:fields {:primary_functions {:type (list String)}
-            :id {:type Int}
-            :name {:type String}
-            :appears_in {:type (list :episode)}}}
+         {
+          :report          {:fields {:id           {:type String}
+                                     :name         {:type String}
+                                     :description  {:type String}
+                                     :data_request {:type :data_request}}}
 
-  :human
-  {:fields {:id {:type Int}
-            :name {:type String}
-            :home_planet {:type String}
-            :appears_in {:type (list :episode)}}}}
+          :db_data_request {:fields {:data_source {:type :data_source}
+                                     :tables      {:type (list :table)}
+                                     :joins       {:type (list :table_join)}}}
+
+
+          :table           {:fields {:name    {:type String}
+                                     :columns {:type (list :column)
+                                               :description "Columns for a table"
+                                               :resolve :Table/columns}}}
+
+          :table_join      {:fields {:table_1 {:type :table}
+                                     :col_1   {:type :column}
+                                     :col_2   {:type :column}
+                                     :table_2 {:type :table}}}
+
+          :column          {:fields {:key     {:type String}
+                                     :name    {:type String}
+                                     :type    {:type String}
+                                     :as_name {:type String}}}
+
+          :org             {:fields {:id           {:type String}
+                                     :name         {:type String}
+                                     :data_sources {:type (list :data_source)}}}
+
+          :db_data_source
+                           {:fields {:id       {:type String}
+                                     :name     {:type String}
+                                     :type     {:type :data_source_type :description "Must be DB"}
+                                     :db_type  {:type :db_type}
+                                     :user     {:type String}
+                                     :password {:type String}
+                                     :url      {:type String}
+                                     :port     {:type Int}
+                                     :ssl      {:type Boolean}
+                                     :tables   {:type (list :table)
+                                                :description "The tables associated with this database"
+                                                :resolve :DbDataSource/tables}
+                                     }
+                            }
+          :api_data_source
+                           {:fields {:id       {:type String}
+                                     :name     {:type (non-null String)}
+                                     :type     {:type (non-null :data_source_type) :description "Must be API"}
+                                     :user     {:type String}
+                                     :password {:type String}
+                                     :url      {:type (non-null String)}
+                                     }
+                            }
+
+          }
 
  :queries
- {:hero {:type (non-null :human)
-         :args {:id {:type String :default-value "2001"}}
-         :resolve :get-hero}
-  :droid {:type :droid
-          :args {:name {:type String}}
-          :resolve :get-droid}}}
+         {:get_data_sources {:type    (list :data_source)
+                             :args    {:id {:type String}}
+                             :resolve :queries/get-data-sources}
+
+          }}

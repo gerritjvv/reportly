@@ -7,32 +7,28 @@
     [clojure.edn :as edn]
     [clojure.java.io :as io]
     [ring.util.http-response :refer :all]
-    [mount.core :refer [defstate]]))
+    [mount.core :refer [defstate]]
+    [reportly-graph.queries.datasources :as ds]
+    [reportly-graph.queries.tables :as tables]
+    [reportly-graph.queries.columns :as columns]))
 
-(defn get-hero [context args value]
-  (let [data  [{:id 1000
-               :name "Luke"
-               :home_planet "Tatooine"
-               :appears_in ["NEWHOPE" "EMPIRE" "JEDI"]}
-              {:id 2000
-               :name "Lando Calrissian"
-               :home_planet "Socorro"
-               :appears_in ["EMPIRE" "JEDI"]}]]
-           (first data)))
+(defn -read-edn-schema []
+  (->
+    "graphql/schema.edn"
+    io/resource
+    slurp
+    edn/read-string))
+
+(defn -compile-schema []
+  (-> (-read-edn-schema)
+      (attach-resolvers {:queries/get-data-sources ds/get-data-sources
+                         :DbDataSource/tables      tables/get-data-source-tables
+                         :Table/columns            columns/get-table-columns})
+      schema/compile))
 
 (defstate compiled-schema
   :start
-  (-> "graphql/schema.edn"
-      io/resource
-      slurp
-      edn/read-string
-      (attach-resolvers {:get-hero get-hero
-                         :get-droid (constantly {})})
-      schema/compile))
-
-(defn format-params [query]
-   (let [parsed (json/read-str query)] ;;-> placeholder - need to ensure query meets graphql syntax
-     (str "query { hero(id: \"1000\") { name appears_in }}")))
+          (-compile-schema))
 
 (defn execute-request [query]
     (let [vars nil
