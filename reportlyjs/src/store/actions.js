@@ -2,6 +2,9 @@
  Action Types
  */
 
+import {query} from "./graphql";
+import {transLoadDataSourcesResponse} from "./transformers";
+
 export const DATASOURCES_LOAD = "DATASOURCES_LOAD"
 export const DATASOURCES_LOADED = "DATASOURCES_LOADED"
 
@@ -25,8 +28,8 @@ export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
  Action creators
  */
 export const addQueryColumn = (columnKey) => ({
-   type: QUERY_COLUMN_ADD,
-   columnKey: columnKey,
+    type: QUERY_COLUMN_ADD,
+    columnKey: columnKey,
 });
 
 export const removeQueryColumn = (columnKey) => ({
@@ -35,19 +38,45 @@ export const removeQueryColumn = (columnKey) => ({
 });
 
 // load data source ids and names
-export const loadDataSources = () => ({
-    type: DATASOURCES_LOAD,
-});
+export const loadDataSources = () => {
+    return (dispatch) => {
+        //call datasources
+
+        //@TODO Make grapql call here
+        query(`{
+  get_data_sources{
+    ... on db_data_source {
+      id,
+      name
+  }
+  }
+}`).then(({get_data_sources}) => {
+            console.log("JSON: ");
+            console.log(get_data_sources);
+
+            dispatch({
+                type: DATASOURCES_LOADED,
+                dataSources: transLoadDataSourcesResponse(get_data_sources)
+            });
+        }).catch(reason => {
+            console.log("ERROR LOADING DataSources");
+            console.log(reason);
+            dispatch({
+                type: DATA_SOURCE_LOADED,
+                dataSources: {}
+            });
+        });
+    };
+};
 
 export const loadDataSourcesError = error => ({
     type: DATASOURCES_LOAD_ERROR,
     error: error,
 });
 
-// data sources loaded, expect [{id:, name:}]
 export const dataSourcesLoaded = (dataSources) => ({
     type: DATASOURCES_LOADED,
-    dataSources: dataSources, //must be [ {id: str, name: str} ]
+    dataSources: dataSources,
 });
 
 

@@ -31,7 +31,17 @@
      :url      "localhost"
      :port     5432
      :ssl      true
-     }])
+     }
+   {:id       "uuidabc"
+    :name     "Test2"
+    :type     :DB
+    :user     "test"
+    :password "1234"
+    :db_type  :POSTGRES
+    :url      "localhost"
+    :port     5432
+    :ssl      true
+    }])
 
 ;;; Public queries
 

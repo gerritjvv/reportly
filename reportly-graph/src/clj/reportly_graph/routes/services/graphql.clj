@@ -32,6 +32,11 @@
 
 (defn execute-request [query]
     (let [vars nil
-          context nil]
-    (-> (lacinia/execute compiled-schema query vars context)
-        (json/write-str))))
+          context nil
+          res (-> (lacinia/execute compiled-schema query vars context)
+                  (json/write-str))]
+
+      (prn "Got Query: " query)
+      (prn "return: " res)
+
+      res))

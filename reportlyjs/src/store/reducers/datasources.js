@@ -14,25 +14,27 @@ const initState =
         visibleDataSource: "default",
         dataSources:
             {
-                "default": {
-                    columns: {
-                        "A": {key: "A", name: "NameA"},
-                        "date": {key: "date", name: "Date"},
-                        "fmid": {key: "fmid", name: "Flight Media"},
-                        "cid": {key: "cid", name: "Campaign"},
-                    },
-                    // a set of selected column keys that map to the columns
-                    selectedColumns: [],
-                    data: {
-                        columns: ["date", "Flight Media", "Campaign"],
-                        rows: [
-                            ["2019-02-01", "1", "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"],
-                            ["2019-02-01", "1", "2"],
-                            ["2019-02-01", "1", "2"],
-                            ["2019-02-01", "1", "2"],
-                        ],
-                    },
-                }
+                // "default": {
+                //     name: "default",
+                //
+                //     columns: {
+                //         "A": {key: "A", name: "NameA"},
+                //         "date": {key: "date", name: "Date"},
+                //         "fmid": {key: "fmid", name: "Flight Media"},
+                //         "cid": {key: "cid", name: "Campaign"},
+                //     },
+                //     // a set of selected column keys that map to the columns
+                //     selectedColumns: [],
+                //     data: {
+                //         columns: ["date", "Flight Media", "Campaign"],
+                //         rows: [
+                //             ["2019-02-01", "1", "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"],
+                //             ["2019-02-01", "1", "2"],
+                //             ["2019-02-01", "1", "2"],
+                //             ["2019-02-01", "1", "2"],
+                //         ],
+                //     },
+                // }
             },
         loadingFlags:
             {
@@ -49,7 +51,7 @@ const initState =
 
 const removeQueryColumn = (state, {columnKey}) => {
     return updateVisibleDataSource(state, ['selectedColumns'], cols => {
-        return cols.filter( v => v !== columnKey);
+        return cols.filter(v => v !== columnKey);
     });
 };
 
@@ -59,28 +61,40 @@ const addQueryColumn = (state, {columnKey}) => {
     });
 };
 
+const setDataSourcesLoadingFlag = (state, isLoading) => {
+    const newState = Object.assign({}, state);
+    newState.loadingFlags.loadingDataSources = isLoading;
+    return newState;
+};
+
+const setDataSources = (state, {dataSources}) => {
+    const newState = Object.assign({}, state);
+    newState.dataSources = dataSources;
+    return newState;
+};
+
 const datasourcesReducer = (state = initState, action) => {
     console.log("datasourcesReducer:");
     console.log(action);
 
     switch (action.type) {
         case DATASOURCES_LOAD: {
-            return state.updateIn(['loadingFlags', 'loadingDataSources'], true);
+            return setDataSourcesLoadingFlag(state, true);
         }
         case DATASOURCES_LOADED: {
-            return state.updateIn(['loadingFlags', 'loadingDataSources'], false);
+            return setDataSourcesLoadingFlag(setDataSources(state, action), false);
         }
         case DATA_SOURCE_LOAD: {
-            return state.updateIn(['loadingFlags', 'loadingDataSource'], true);
+            return state;
         }
         case DATA_SOURCE_LOADED: {
-            return state.updateIn(['loadingFlags', 'loadingDataSource'], false);
+            return state;
         }
         case ROWS_LOAD: {
-            return state.updateIn(['loadingFlags', 'loadingRows'], false);
+            return state;
         }
         case ROWS_LOADED: {
-            return state.updateIn(['loadingFlags', 'loadingRows'], false);
+            return state;
         }
         case QUERY_COLUMN_ADD: {
             return addQueryColumn(state, action);

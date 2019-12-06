@@ -13,14 +13,14 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     environment:
       AWS_REGION: "eu-west-1"
-      PORT: 3000
+      PORT: 8484
       DATABASE_URL: "jdbc:postgresql://postgresd/reportly?user=test&password=test"
     depends_on:
     - postgresd
     links:
     - postgresd:postgres
     ports:
-    - "3000:3000"
+    - "8484:8484"
   postgresd:
     image: postgres:9.6
     ports:
