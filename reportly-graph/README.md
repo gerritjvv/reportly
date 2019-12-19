@@ -14,7 +14,7 @@ then
 
 # Graph IQL
 
-Open the browser at http://localhost:3000/api/graphql.html
+Open the browser at http://localhost:8000/api/graphql.html
 
 
 # GraphQL Schema

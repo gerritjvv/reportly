@@ -9,6 +9,8 @@
     [ring.util.http-response :refer :all]
     [mount.core :refer [defstate]]
     [reportly-graph.queries.datasources :as ds]
+    [reportly-graph.mutations.datasources :as m-ds]
+
     [reportly-graph.queries.tables :as tables]
     [reportly-graph.queries.columns :as columns]))
 
@@ -22,6 +24,9 @@
 (defn -compile-schema []
   (-> (-read-edn-schema)
       (attach-resolvers {:queries/get-data-sources ds/get-data-sources
+                         :mutations/test-db-data-source m-ds/test-db-data-source
+                         :mutations/save-db-data-source m-ds/save-db-data-source
+
                          :DbDataSource/tables      tables/get-data-source-tables
                          :Table/columns            columns/get-table-columns})
       schema/compile))

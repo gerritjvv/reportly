@@ -7,6 +7,12 @@ import {
     ROWS_LOAD, QUERY_COLUMN_ADD, QUERY_COLUMN_REMOVE,
 } from '../actions';
 
+import {
+    TEST_DATASOURCE_CONNECTION, TEST_DATASOURCE_CONNECTION_RESP_ERR, TEST_DATASOURCE_CONNECTION_RESP_OK,
+//     TEST_DATASOURCE_CONNECTION_RESP_OK,
+//     TEST_DATASOURCE_CONNECTION_RESP_ERR
+} from '../createDataSourceActions'
+
 import {updateVisibleDataSource} from '../selectors';
 
 const initState =
@@ -41,7 +47,12 @@ const initState =
                 loadingDataSources: false,
                 loadingDataSource: false,
                 loadingRows: false,
-            }
+                testingDataSource: false,
+            },
+        testingDataSource: {
+            msg: "",
+            success: true,
+        }
     };
 
 
@@ -67,10 +78,23 @@ const setDataSourcesLoadingFlag = (state, isLoading) => {
     return newState;
 };
 
+const setDataSourceTestingFlag = (state, isTesting) => {
+    const newState = Object.assign({}, state);
+    newState.loadingFlags.testingDataSource = isTesting;
+    return newState;
+};
+
 const setDataSources = (state, {dataSources}) => {
     const newState = Object.assign({}, state);
     newState.dataSources = dataSources;
     return newState;
+};
+
+const updateTestingDataSource = (state, {msg, success}) => {
+    const newState = Object.assign({}, state);
+    newState.testingDataSource = {msg: msg, success: success}
+
+    return newState
 };
 
 const datasourcesReducer = (state = initState, action) => {
@@ -78,6 +102,17 @@ const datasourcesReducer = (state = initState, action) => {
     console.log(action);
 
     switch (action.type) {
+        case TEST_DATASOURCE_CONNECTION_RESP_OK: {
+            return updateTestingDataSource(setDataSourceTestingFlag(state, false), action);
+        }
+        case TEST_DATASOURCE_CONNECTION_RESP_ERR: {
+            return updateTestingDataSource(setDataSourceTestingFlag(state, false), action);
+        }
+        case TEST_DATASOURCE_CONNECTION: {
+            console.log("DataSources Reducer: TEST_DATASOURCE_CONNECTION:" );
+
+            return setDataSourceTestingFlag(state, true)
+        }
         case DATASOURCES_LOAD: {
             return setDataSourcesLoadingFlag(state, true);
         }

@@ -1,84 +1,113 @@
 {:enums
-         {:data_source_type
-          {:description "The type of datasource"
-           :values      [:DB :API]}
+                {:data_source_type
+                 {:description "The type of datasource"
+                  :values      [:DB :API]}
 
-          :db_type
-          {:description "The type of database"
-           :values      [:MYSQL :POSTGRES]}
+                 :db_type
+                 {:description "The type of database"
+                  :values      [:MYSQL :POSTGRES :ATHENA]}
 
-          :episode
-          {:description "The episodes of the original Star Wars trilogy."
-           :values      [:NEWHOPE :EMPIRE :JEDI]}}
+                 :episode
+                 {:description "The episodes of the original Star Wars trilogy."
+                  :values      [:NEWHOPE :EMPIRE :JEDI]}}
 
 
- :unions {
-          :data_source  {:members [:db_data_source :api_data_source]}
-          :data_request {:members [:db_data_request]}
+ :unions        {
+                 :data_source  {:members [:db_data_source :api_data_source]}
+                 :data_request {:members [:db_data_request]}
 
-          }
+                 }
 
  :objects
-         {
-          :report          {:fields {:id           {:type String}
-                                     :name         {:type String}
-                                     :description  {:type String}
-                                     :data_request {:type :data_request}}}
+                {
+                 :report          {:fields {:id           {:type String}
+                                            :name         {:type String}
+                                            :description  {:type String}
+                                            :data_request {:type :data_request}}}
 
-          :db_data_request {:fields {:data_source {:type :data_source}
-                                     :tables      {:type (list :table)}
-                                     :joins       {:type (list :table_join)}}}
+                 :db_data_request {:fields {:data_source {:type :data_source}
+                                            :tables      {:type (list :table)}
+                                            :joins       {:type (list :table_join)}}}
 
 
-          :table           {:fields {:name    {:type String}
-                                     :columns {:type (list :column)
-                                               :description "Columns for a table"
-                                               :resolve :Table/columns}}}
+                 :table           {:fields {:name    {:type String}
+                                            :columns {:type        (list :column)
+                                                      :description "Columns for a table"
+                                                      :resolve     :Table/columns}}}
 
-          :table_join      {:fields {:table_1 {:type :table}
-                                     :col_1   {:type :column}
-                                     :col_2   {:type :column}
-                                     :table_2 {:type :table}}}
+                 :table_join      {:fields {:table_1 {:type :table}
+                                            :col_1   {:type :column}
+                                            :col_2   {:type :column}
+                                            :table_2 {:type :table}}}
 
-          :column          {:fields {:key     {:type String}
-                                     :name    {:type String}
-                                     :type    {:type String}
-                                     :as_name {:type String}}}
+                 :column          {:fields {:key     {:type String}
+                                            :name    {:type String}
+                                            :type    {:type String}
+                                            :as_name {:type String}}}
 
-          :org             {:fields {:id           {:type String}
-                                     :name         {:type String}
-                                     :data_sources {:type (list :data_source)}}}
+                 :org             {:fields {:id           {:type String}
+                                            :name         {:type String}
+                                            :data_sources {:type (list :data_source)}}}
 
-          :db_data_source
-                           {:fields {:id       {:type String}
-                                     :name     {:type String}
-                                     :type     {:type :data_source_type :description "Must be DB"}
-                                     :db_type  {:type :db_type}
-                                     :user     {:type String}
-                                     :password {:type String}
-                                     :url      {:type String}
-                                     :port     {:type Int}
-                                     :ssl      {:type Boolean}
-                                     :tables   {:type (list :table)
-                                                :description "The tables associated with this database"
-                                                :resolve :DbDataSource/tables}
-                                     }
-                            }
-          :api_data_source
-                           {:fields {:id       {:type String}
-                                     :name     {:type (non-null String)}
-                                     :type     {:type (non-null :data_source_type) :description "Must be API"}
-                                     :user     {:type String}
-                                     :password {:type String}
-                                     :url      {:type (non-null String)}
-                                     }
-                            }
+                 :db_data_source
+                                  {:fields {:id       {:type String}
+                                            :name     {:type String}
+                                            :type     {:type :data_source_type :description "Must be DB"}
+                                            :db_type  {:type :db_type}
+                                            :user     {:type String}
+                                            :password {:type String}
+                                            :url      {:type String}
+                                            :port     {:type Int}
+                                            :ssl      {:type Boolean}
+                                            :tables   {:type        (list :table)
+                                                       :description "The tables associated with this database"
+                                                       :resolve     :DbDataSource/tables}
+                                            }
+                                   }
+                 :api_data_source
+                                  {:fields {:id       {:type String}
+                                            :name     {:type (non-null String)}
+                                            :type     {:type (non-null :data_source_type) :description "Must be API"}
+                                            :user     {:type String}
+                                            :password {:type String}
+                                            :url      {:type (non-null String)}
+                                            }
+                                   }
 
-          }
+                 }
 
  :queries
-         {:get_data_sources {:type    (list :data_source)
-                             :args    {:id {:type String}}
-                             :resolve :queries/get-data-sources}
+                {:get_data_sources {:type    (list :data_source)
+                                    :args    {:id {:type String}}
+                                    :resolve :queries/get-data-sources}
 
-          }}
+                 }
+
+
+ :input-objects {
+                 :DBDataSourceInput {:fields {:name     {:type String}
+                                              :db_type  {:type :db_type}
+                                              :user     {:type String}
+                                              :password {:type String}
+                                              :url      {:type String}
+                                              :port     {:type Int}
+                                              :ssl      {:type Boolean}
+                                              }}}
+ :mutations     {:test_db_data_source
+                 {:type        :db_data_source
+                  :args        {
+                                :data_source {:type :DBDataSourceInput}
+                                }
+                  :description "Test the connectivity to a datasources"
+                  :resolve     :mutations/test-db-data-source
+                  }
+                 :save_db_data_source
+                 {:type        :db_data_source
+                  :args        {
+                                :data_source {:type :DBDataSourceInput}
+                                }
+                  :description "Save a datasource"
+                  :resolve     :mutations/save-db-data-source
+                  }
+                 }
+ }

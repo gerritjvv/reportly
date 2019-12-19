@@ -7,23 +7,54 @@ import {show} from 'redux-modal'
 import DataSources from "./DataSources";
 import {getDataSourceStateFromStore} from "../../store/selectors";
 import {loadDataSources} from "../../store/actions";
+import {testDataSourceConn, saveDataSourceConn} from "../../store/createDataSourceActions";
+
 import {CREATE_DATASOURCE_MODAL} from '../../tool/modals';
 import CreateDataSourceModal from "./CreateDataSourceModal";
 
-// Show the DataSources downloaded form the grpahql server
+/*
+ Show the DataSources downloaded form the grpahql server
+ Relies on state:
+  testingDataSource: {
+            msg: "",
+            success: true,
+        },
+  CreateDataSourceModal { show},
+
+  for the CreateDataSourceModal
+ */
+
 class DataSourceList extends React.Component {
 
     componentDidMount() {
         this.props.loadDataSources();
     }
 
+    testDataSource = (ds) => {
+      this.props.testDataSource(ds, this.showCreateDataSource);
+    };
+
+    saveDataSource = (ds) => {
+        this.props.saveDataSource(ds);
+    };
+
     showCreateDataSource = () => {
-        console.log("Create DataSource");
-        this.props.show(CREATE_DATASOURCE_MODAL);
-    }
+        this.props.show(CREATE_DATASOURCE_MODAL, {
+            saveDataSource: this.saveDataSource,
+            testDataSource: this.testDataSource,
+            testingDataSourceFlag: this.props.testingDataSourceFag,
+            testingDataSource: this.props.testingDataSource,
+        });
+    };
+
+    shouldShowCreateDataSourceModal = () => {
+        return this.props.createDataSourceModalState && this.props.createDataSourceModalState.show
+    };
 
     render() {
+
         const dataSources = this.props.dataSources;
+
         return (
             <article className="panel is-primary">
                 <div className="panel-heading">
@@ -31,7 +62,7 @@ class DataSourceList extends React.Component {
                 </div>
                 <div className="panel-block is-full-width">
                     <DataSources dataSources={dataSources}/>
-                    <CreateDataSourceModal dispatch={this.props.dispatch}/>
+                    {this.shouldShowCreateDataSourceModal() ? <CreateDataSourceModal/> : <span></span>}
                 </div>
             </article>);
     }
@@ -45,13 +76,18 @@ const mapStateToProps = store => {
 
     return {
         dataSources: state.dataSources,
+        testingDataSourceFlag: state.loadingFlags.testingDataSource,
+        testingDataSource: state.testingDataSource,
+        createDataSourceModalState: state.CreateDataSourceModal
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
         loadDataSources: () => dispatch(loadDataSources()),
-        show: (name) => dispatch(show(name, {})),
+        show: (name, props) => dispatch(show(name, props)),
+        saveDataSource: (ds) => dispatch(saveDataSourceConn(ds)),
+        testDataSource: (ds, callback) => dispatch(testDataSourceConn(ds, callback)),
     };
 };
 

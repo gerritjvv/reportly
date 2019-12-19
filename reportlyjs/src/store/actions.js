@@ -41,8 +41,6 @@ export const removeQueryColumn = (columnKey) => ({
 export const loadDataSources = () => {
     return (dispatch) => {
         //call datasources
-
-        //@TODO Make grapql call here
         query(`{
   get_data_sources{
     ... on db_data_source {
