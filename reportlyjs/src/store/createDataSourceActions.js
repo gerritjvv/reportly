@@ -20,7 +20,7 @@ export const saveDataSourceConn = ({
                                        port,
                                        url,
                                        tls,
-                                       dbType
+                                       dbType,
                                    }) => {
     return (dispatch) => {
         dispatch({type: SAVE_DATASOURCE_CONNECTION});
@@ -71,7 +71,7 @@ export const testDataSourceConn = ({
                                        port,
                                        url,
                                        tls,
-                                       dbType
+                                       dbType,
                                    }, callback) => {
     return (dispatch) => {
 

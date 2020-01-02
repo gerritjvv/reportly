@@ -9,7 +9,22 @@ export const transLoadDataSourcesResponse = (resp) => {
 
     const state = {};
 
-    resp.forEach( ds => state[ds["id"]] = {name: ds["name"]});
+    resp.forEach( ds => state[ds["id"]] = {
+        id: ds["id"],
+        name: ds["name"],
+        tables: transformTables(ds["tables"]),
+    });
+
+    return state;
+}
+
+const transformTables = (tables) => {
+    if(! tables) {
+        return {}
+    }
+
+    const state = {};
+    tables.forEach( tbl => state[tbl["name"]] = tbl);
 
     return state;
 }

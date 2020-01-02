@@ -4,19 +4,22 @@ import {
     DATA_SOURCE_LOAD,
     DATA_SOURCE_LOADED,
     ROWS_LOADED,
-    ROWS_LOAD, QUERY_COLUMN_ADD, QUERY_COLUMN_REMOVE,
+    ROWS_LOAD, QUERY_COLUMN_ADD, QUERY_COLUMN_REMOVE, CREATE_REPORT_SELECT_DS, CREATE_REPORT_SELECT_TABLE,
 } from '../actions';
 
 import {
     TEST_DATASOURCE_CONNECTION, TEST_DATASOURCE_CONNECTION_RESP_ERR, TEST_DATASOURCE_CONNECTION_RESP_OK,
-//     TEST_DATASOURCE_CONNECTION_RESP_OK,
-//     TEST_DATASOURCE_CONNECTION_RESP_ERR
 } from '../createDataSourceActions'
 
-import {updateVisibleDataSource} from '../selectors';
+import {updateVisibleDataSource} from '../selectors/selectors';
 
 const initState =
     {
+        createReport: {
+            selectedDataSource: "",
+            selectedTable: "",
+        },
+
         visibleDataSource: "default",
         dataSources:
             {
@@ -97,11 +100,39 @@ const updateTestingDataSource = (state, {msg, success}) => {
     return newState
 };
 
+const updateCreateReport = (state, {dsKey, tableName}) => {
+    const newState = Object.assign({}, state);
+
+    let newCreateReport = newState.createReport;
+    if(!newCreateReport) {
+        newCreateReport = {};
+    }
+
+    newState.createReport = newCreateReport;
+
+    if(dsKey) {
+        newCreateReport.selectedDataSource = dsKey;
+        newCreateReport.selectedTable = "";
+    }
+
+    if(tableName) {
+        newCreateReport.selectedTable = tableName;
+    }
+
+    return newState;
+};
+
 const datasourcesReducer = (state = initState, action) => {
     console.log("datasourcesReducer:");
     console.log(action);
 
     switch (action.type) {
+        case CREATE_REPORT_SELECT_DS : {
+            return updateCreateReport(state, action);
+        }
+        case CREATE_REPORT_SELECT_TABLE : {
+            return updateCreateReport(state, action);
+        }
         case TEST_DATASOURCE_CONNECTION_RESP_OK: {
             return updateTestingDataSource(setDataSourceTestingFlag(state, false), action);
         }
@@ -109,8 +140,6 @@ const datasourcesReducer = (state = initState, action) => {
             return updateTestingDataSource(setDataSourceTestingFlag(state, false), action);
         }
         case TEST_DATASOURCE_CONNECTION: {
-            console.log("DataSources Reducer: TEST_DATASOURCE_CONNECTION:" );
-
             return setDataSourceTestingFlag(state, true)
         }
         case DATASOURCES_LOAD: {

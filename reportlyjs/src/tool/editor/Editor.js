@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-bulma-components/dist/react-bulma-components.min.css';
 import 'bulma-helpers/css/bulma-helpers.min.css';
 
-import {getDataSourceStateFromStore, getShowableColumns, getSelectedColumns, getData} from '../../store/selectors';
+import {getDataSourceStateFromStore, getShowableColumns, getSelectedColumns, getData} from '../../store/selectors/selectors';
 import {addQueryColumn, removeQueryColumn} from '../../store/actions';
 
 import './Editor.css';
@@ -79,15 +79,17 @@ class Editor extends React.Component {
 
     render() {
         return (
-            <DndProvider backend={HTML5Backend}>
-                <BuilderArea
-                    tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
-                    columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
-                    queryColumns={this.props.queryColumns}
-                    columns={this.props.columns}
-                    data={this.props.data}
-                />
-            </DndProvider>
+            <div className="container">
+                <DndProvider backend={HTML5Backend}>
+                    <BuilderArea
+                        tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
+                        columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
+                        queryColumns={this.props.queryColumns}
+                        columns={this.props.columns}
+                        data={this.props.data}
+                    />
+                </DndProvider>
+            </div>
         )
             ;
     }

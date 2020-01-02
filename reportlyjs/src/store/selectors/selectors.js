@@ -3,12 +3,24 @@ import {Map, Set} from 'immutable';
 // returns the datasources reducer state see index.js
 export const getDataSourceStateFromStore = store => {
     return store.editor
-}
+};
+
+export const getDataSources = state => {
+    return state.dataSources;
+};
+
+export const isLoadingDataSources = (state) => {
+    return state.loadingFlags.loadingDataSources;
+};
 
 // returns the data store object currently visible
 // {:columns, :selectedColumns, :data}
-export const getVisibleDataSource = state =>
-    state.dataSources[state.visibleDataSource];
+export const getVisibleDataSource = state => {
+
+    const ds = state.dataSources[state.visibleDataSource];
+
+    return ds ? ds : { columns: [], selectedColumns: [], data: {columns: [], rows: []}};
+};
 
 // return a set of {:key, :name} columns
 export const getSelectedColumns = state => {
@@ -30,7 +42,8 @@ export const getColumns = state => {
 // for the user
 export const getShowableColumns = state => {
     const dataSource = getVisibleDataSource(state);
-    const selectedCols = Set(dataSource.selectedColumns);
+
+    const selectedCols = dataSource.selectedColumns ? Set(dataSource.selectedColumns) : Set();
     return Object.values(dataSource.columns).filter( c => !selectedCols.has(c.key));
 }
 

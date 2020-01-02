@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import {show} from 'redux-modal'
 
 import DataSources from "./DataSources";
-import {getDataSourceStateFromStore} from "../../store/selectors";
+import {getDataSourceStateFromStore} from "../../store/selectors/selectors";
 import {loadDataSources} from "../../store/actions";
 import {testDataSourceConn, saveDataSourceConn} from "../../store/createDataSourceActions";
 
@@ -42,7 +42,7 @@ class DataSourceList extends React.Component {
         this.props.show(CREATE_DATASOURCE_MODAL, {
             saveDataSource: this.saveDataSource,
             testDataSource: this.testDataSource,
-            testingDataSourceFlag: this.props.testingDataSourceFag,
+            testingDataSourceFlag: this.props.testingDataSourceFlag,
             testingDataSource: this.props.testingDataSource,
         });
     };
@@ -56,15 +56,18 @@ class DataSourceList extends React.Component {
         const dataSources = this.props.dataSources;
 
         return (
-            <article className="panel is-primary">
-                <div className="panel-heading">
-                    <button className="button is-primary" onClick={this.showCreateDataSource}>Create</button>
-                </div>
-                <div className="panel-block is-full-width">
-                    <DataSources dataSources={dataSources}/>
-                    {this.shouldShowCreateDataSourceModal() ? <CreateDataSourceModal/> : <span></span>}
-                </div>
-            </article>);
+            <div className="container">
+                <article className="panel is-primary">
+                    <div className="panel-heading">
+                        <button className="button is-primary" onClick={this.showCreateDataSource}>Create</button>
+                    </div>
+                    <div className="panel-block is-full-width">
+                        <DataSources dataSources={dataSources}/>
+                        {this.shouldShowCreateDataSourceModal() ? <CreateDataSourceModal/> : <span></span>}
+                    </div>
+                </article>
+            </div>
+           );
     }
 
 }

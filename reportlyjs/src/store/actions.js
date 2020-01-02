@@ -5,11 +5,13 @@
 import {query} from "./graphql";
 import {transLoadDataSourcesResponse} from "./transformers";
 
-export const DATASOURCES_LOAD = "DATASOURCES_LOAD"
-export const DATASOURCES_LOADED = "DATASOURCES_LOADED"
+export const DATASOURCES_LOAD = "DATASOURCES_LOAD";
+export const DATASOURCES_LOADED = "DATASOURCES_LOADED";
+export const DATASOURCES_LOAD_ERROR = "LOAD_DATASOURCES_ERROR";
 
-export const DATASOURCES_LOAD_ERROR = "LOAD_DATASOURCES_ERROR"
-
+// Report create actions
+export const CREATE_REPORT_SELECT_DS = "CREATE_REPORT_SELECT_DS";
+export const CREATE_REPORT_SELECT_TABLE = "CREATE_REPORT_SELECT_TABLE";
 
 // data source corresponds to a list of columns that can be queried
 export const DATA_SOURCE_LOAD = "DATA_SOURCE_LOAD";
@@ -27,6 +29,19 @@ export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
 /*
  Action creators
  */
+
+export const reportCreateSelectDataSource = (dsKey) => (
+    {
+        type: CREATE_REPORT_SELECT_DS,
+        dsKey: dsKey,
+        tableName: "",
+    });
+export const reportCreateSelectTable = (tblName) => (
+    {
+        type: CREATE_REPORT_SELECT_TABLE,
+        tableName: tblName,
+    });
+
 export const addQueryColumn = (columnKey) => ({
     type: QUERY_COLUMN_ADD,
     columnKey: columnKey,
@@ -46,7 +61,16 @@ export const loadDataSources = () => {
     ... on db_data_source {
       id,
       name
-  }
+      tables {
+        name
+        columns {
+          as_name
+          key
+          name
+          type
+        }
+      }
+   }
   }
 }`).then(({get_data_sources}) => {
             console.log("JSON: ");
