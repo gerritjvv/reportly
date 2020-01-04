@@ -71,7 +71,8 @@ const removeQueryColumn = (state, {columnKey}) => {
 
 const addQueryColumn = (state, {columnKey}) => {
     return updateVisibleDataSource(state, ['selectedColumns'], cols => {
-        return [...new Set([...cols, columnKey])]
+        const cols2 = cols ? cols : [];
+        return [...new Set([...cols2, columnKey])]
     });
 };
 
@@ -95,7 +96,7 @@ const setDataSources = (state, {dataSources}) => {
 
 const updateTestingDataSource = (state, {msg, success}) => {
     const newState = Object.assign({}, state);
-    newState.testingDataSource = {msg: msg, success: success}
+    newState.testingDataSource = {msg: msg, success: success};
 
     return newState
 };

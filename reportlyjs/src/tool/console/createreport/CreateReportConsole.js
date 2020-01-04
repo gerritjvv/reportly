@@ -20,12 +20,6 @@ class CreateReportConsole extends React.Component {
     render() {
         const {dataSources, isLoadingDataSources} = this.props
 
-        console.log(">>>>> CreateReportConsole: ");
-        console.log({
-            dataSources: Object.keys(dataSources).length,
-            isLoadingDataSources: isLoadingDataSources,
-        });
-
         if (isLoadingDataSources) {
             return (
                 <div className="container is-centered">

@@ -8,7 +8,6 @@ import store from './store';
 import 'react-bulma-components/dist/react-bulma-components.min.css';
 import 'bulma-helpers/css/bulma-helpers.min.css';
 
-import Editor from "./tool/editor/Editor"
 import DataSourceList from "./tool/datasources/DataSourceList";
 
 import {Provider} from 'react-redux'
@@ -17,6 +16,7 @@ import Header from "./tool/header/Header";
 import {breadCrumb} from "./tool/lib/route";
 import CreateReportConsole from "./tool/console/createreport/CreateReportConsole";
 import CreateReportConsoleSelectTable from "./tool/console/createreport/CreateReportConsoleSelectTable";
+import CreateReportConsoleEditor from "./tool/console/createreport/CreateReportConsoleEditor";
 
 class App extends React.Component {
 
@@ -44,8 +44,16 @@ class App extends React.Component {
                                            {lbl: "Create Report", to: "/create_report_console"},
                                            {lbl: "Select a Table", to: "/"}])}/>
 
-                            <Route exact path="/editor"
-                                   component={breadCrumb(Editor, [crumbHome, {lbl: "Query Editor", to: "/"}])}/>
+                            <Route exact path="/create_report_console/editor"
+                                   component={breadCrumb(CreateReportConsoleEditor,
+                                       [crumbHome,
+                                           {lbl: "Create Report", to: "/create_report_console"},
+                                           {lbl: "Select a Table", to: "/create_report_console/selectTables"},
+                                           {lbl: "Editor", to: "/"}])}/>
+
+                            {/*<Route exact path="/editor"*/}
+                            {/*       component={breadCrumb(Editor, [crumbHome, {lbl: "Query Editor", to: "/"}])}/>*/}
+                            {/*       */}
                         </div>
                     </BrowserRouter>
 

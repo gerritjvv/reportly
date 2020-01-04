@@ -2,7 +2,7 @@ import React from "react";
 import {getDataSourceStateFromStore} from "../../../store/selectors/selectors";
 import {getCreateReportSelectedDSTables} from "../../../store/selectors/createreportSelectors";
 
-import {reportCreateSelectTable} from "../../../store/actions";
+import {loadDataSources, reportCreateSelectTable} from "../../../store/actions";
 import {connect} from "react-redux";
 import {routeTo} from "../../lib/route";
 
@@ -12,7 +12,12 @@ class CreateReportConsoleSelectTable extends React.Component {
 
     selectTable = (tableName) => {
         this.props.selectTable(tableName);
+        this.route("/create_report_console/editor")();
     };
+
+    componentDidMount() {
+        this.props.loadDataSources();
+    }
 
     render() {
         return this.showDataSourcesTables(this.props.tables);
@@ -32,7 +37,8 @@ class CreateReportConsoleSelectTable extends React.Component {
                         return (
                             <tr key={tblName}>
                                 <td>
-                                    <button className="button has-text-link is-borderless" onClick={ () => this.selectTable(tblName)}>{tblName}</button>
+                                    <button className="button has-text-link is-borderless"
+                                            onClick={() => this.selectTable(tblName)}>{tblName}</button>
                                 </td>
                             </tr>
                         );
@@ -57,6 +63,7 @@ const mapStateToProps = store => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        loadDataSources: () => dispatch(loadDataSources()),
         selectTable: (tblName) => dispatch(reportCreateSelectTable(tblName)),
     };
 };
