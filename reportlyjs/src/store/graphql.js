@@ -27,6 +27,7 @@ const checkForErrors = (json) => {
  * @returns {Promise<Response>}
  */
 export const query = (data) => {
+    console.log("Query :" + data.replace(/(\r\n|\n|\r)/gm, ''));
     return fetch(URL,
         {
             method: 'POST',

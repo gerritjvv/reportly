@@ -1,6 +1,6 @@
 import {combineReducers} from 'redux';
 
-import {reducer as modal} from 'redux-modal'
+import {reducer as modal} from 'redux-modal';
 import datasourcesReducer from './datasources';
 
 const reducer = (state, action) => {

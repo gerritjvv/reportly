@@ -16,7 +16,7 @@ export const transLoadDataSourcesResponse = (resp) => {
     });
 
     return state;
-}
+};
 
 const transformTables = (tables) => {
     if(! tables) {

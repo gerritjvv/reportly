@@ -3,6 +3,11 @@
                  {:description "The type of datasource"
                   :values      [:DB :API]}
 
+
+                 :query_status
+                 {:description "Status of a query reported"
+                  :values      [:ERROR :INPROGRESS :DONE]}
+
                  :db_type
                  {:description "The type of database"
                   :values      [:MYSQL :POSTGRES :ATHENA]}
@@ -10,7 +15,6 @@
                  :episode
                  {:description "The episodes of the original Star Wars trilogy."
                   :values      [:NEWHOPE :EMPIRE :JEDI]}}
-
 
  :unions        {
                  :data_source  {:members [:db_data_source :api_data_source]}
@@ -20,71 +24,119 @@
 
  :objects
                 {
-                 :report          {:fields {:id           {:type String}
-                                            :name         {:type String}
-                                            :description  {:type String}
-                                            :data_request {:type :data_request}}}
 
-                 :db_data_request {:fields {:data_source {:type :data_source}
-                                            :tables      {:type (list :table)}
-                                            :joins       {:type (list :table_join)}}}
+                 ;; a single report contains its own copy of the tables and columns specific to this report
+                 ;; this allows us to change data like as_name specific to each report and not per ds.
+                 :report                 {:fields {:id           {:type String}
+                                                   :name         {:type String}
+                                                   :description  {:type String}
+                                                   :data_request {:type :data_request}}}
+
+                 ;; The request is part of the report, and contains the tables and columns that should be
+                 ;; queried. The columns include the key and as_name because we want to store the "as_name" specific
+                 ;; to each report
+                 :db_data_request        {:fields {:data_source_id {:type String}
+                                                   :tables         {:type (list :table)}}}
+
+                 ;; on response to a report query, the data returned is a unique id to poll for the query status
+                 :report_query_resp      {:fields {:id {:type String}}}
 
 
-                 :table           {:fields {:name    {:type String}
-                                            :columns {:type        (list :column)
-                                                      :description "Columns for a table"
-                                                      :resolve     :Table/columns}}}
+                 :report_query_poll_resp {:fields {:status  {:type :query_status}
 
-                 :table_join      {:fields {:table_1 {:type :table}
-                                            :col_1   {:type :column}
-                                            :col_2   {:type :column}
-                                            :table_2 {:type :table}}}
+                                                   ;; error message
+                                                   :msg     {:type String}
 
-                 :column          {:fields {:key     {:type String}
-                                            :name    {:type String}
-                                            :type    {:type String}
-                                            :as_name {:type String}}}
+                                                   :columns {:type (list String)}
+                                                   ;; the data each row
+                                                   :rows    {:type (list (list String))}
+                                                   }}
 
-                 :org             {:fields {:id           {:type String}
-                                            :name         {:type String}
-                                            :data_sources {:type (list :data_source)}}}
+                 :table                  {:fields {:name    {:type String}
+                                                   :columns {:type        (list :column)
+                                                             :description "Columns for a table"
+                                                             :resolve     :Table/columns}}}
+
+                 :table_join             {:fields {:table_1 {:type :table}
+                                                   :col_1   {:type :column}
+                                                   :col_2   {:type :column}
+                                                   :table_2 {:type :table}}}
+
+                 :column                 {:fields {:key     {:type String}
+                                                   :name    {:type String}
+                                                   :type    {:type String}
+                                                   :as_name {:type String}}}
+
+                 :org                    {:fields {:id           {:type String}
+                                                   :name         {:type String}
+                                                   :data_sources {:type (list :data_source)}}}
 
                  :db_data_source
-                                  {:fields {:id       {:type String}
-                                            :name     {:type String}
-                                            :type     {:type :data_source_type :description "Must be DB"}
-                                            :db_type  {:type :db_type}
-                                            :user     {:type String}
-                                            :password {:type String}
-                                            :url      {:type String}
-                                            :port     {:type Int}
-                                            :ssl      {:type Boolean}
-                                            :tables   {:type        (list :table)
-                                                       :description "The tables associated with this database"
-                                                       :resolve     :DbDataSource/tables}
-                                            }
-                                   }
+                                         {:fields {:id       {:type String}
+                                                   :name     {:type String}
+                                                   :type     {:type :data_source_type :description "Must be DB"}
+                                                   :db_type  {:type :db_type}
+                                                   :user     {:type String}
+                                                   :password {:type String}
+                                                   :url      {:type String}
+                                                   :port     {:type Int}
+                                                   :ssl      {:type Boolean}
+                                                   :tables   {:type        (list :table)
+                                                              :description "The tables associated with this database"
+                                                              :resolve     :DbDataSource/tables}
+                                                   }
+                                          }
                  :api_data_source
-                                  {:fields {:id       {:type String}
-                                            :name     {:type (non-null String)}
-                                            :type     {:type (non-null :data_source_type) :description "Must be API"}
-                                            :user     {:type String}
-                                            :password {:type String}
-                                            :url      {:type (non-null String)}
-                                            }
-                                   }
+                                         {:fields {:id       {:type String}
+                                                   :name     {:type (non-null String)}
+                                                   :type     {:type (non-null :data_source_type) :description "Must be API"}
+                                                   :user     {:type String}
+                                                   :password {:type String}
+                                                   :url      {:type (non-null String)}
+                                                   }
+                                          }
 
                  }
 
  :queries
-                {:get_data_sources {:type    (list :data_source)
-                                    :args    {:id {:type String}}
-                                    :resolve :queries/get-data-sources}
+                {:get_data_sources  {:type    (list :data_source)
+                                     :args    {:id {:type String}}
+                                     :resolve :queries/get-data-sources}
 
+                 :report_query      {:type    :report_query_resp
+                                     :args    {:report {:type :ReportQuery}}
+                                     :resolve :queries/report-query}
+
+                 :report_query_poll {:type    :report_query_poll_resp
+                                     :args    {
+                                               ;; the unique id returned from the report_query
+                                               :report_query_id {:type String}
+                                               }
+
+                                     :resolve :queries/report-query-poll}
                  }
 
 
  :input-objects {
+                 :ColumnInput {:fields {:key     {:type String}
+                                        :name    {:type String}
+                                        :type    {:type String}
+                                        :as_name {:type String}}}
+
+                 :TableInput {:fields {:name    {:type String}
+                                       :columns {:type        (list :ColumnInput)
+                                                 :description "Columns for a table"}}}
+
+                 :DataRequest       {:fields {:data_source_id {:type String}
+                                              :tables         {:type (list :TableInput)}}}
+
+                 :ReportQuery       {
+                                     :fields {:report_request {:type :DataRequest}
+                                              :report_id      {:type String}
+
+                                              }
+                                     }
+
                  :DBDataSourceInput {:fields {:name     {:type String}
                                               :db_type  {:type :db_type}
                                               :user     {:type String}

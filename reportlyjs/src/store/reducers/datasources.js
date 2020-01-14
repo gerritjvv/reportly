@@ -3,15 +3,20 @@ import {
     DATASOURCES_LOADED,
     DATA_SOURCE_LOAD,
     DATA_SOURCE_LOADED,
-    ROWS_LOADED,
-    ROWS_LOAD, QUERY_COLUMN_ADD, QUERY_COLUMN_REMOVE, CREATE_REPORT_SELECT_DS, CREATE_REPORT_SELECT_TABLE,
+    QUERY_COLUMN_ADD,
+    QUERY_COLUMN_REMOVE,
+    CREATE_REPORT_SELECT_DS,
+    CREATE_REPORT_SELECT_TABLE,
+    REPORT_QUERY_POLL,
+    REPORT_QUERY_ROWS_LOADED,
 } from '../actions';
 
 import {
     TEST_DATASOURCE_CONNECTION, TEST_DATASOURCE_CONNECTION_RESP_ERR, TEST_DATASOURCE_CONNECTION_RESP_OK,
 } from '../createDataSourceActions'
 
-import {updateVisibleDataSource} from '../selectors/selectors';
+import {updateVisibleDataSource, getDataSourceId, getTable, getSelectedColumns} from '../selectors/selectors';
+import {reportQuery, reportQueryPoll} from './reportQuery';
 
 const initState =
     {
@@ -58,10 +63,37 @@ const initState =
         }
     };
 
+const doReportQueryRowsLoaded = (state, {columns, rows}) => {
+    return updateQueryData(state, columns, rows);
+};
+
+const doReportQuery = (state) => {
+    // we need to createReport {dsId, table and selectedColumns}
+
+    const columns = getSelectedColumns(state);
+
+
+    console.log(state);
+    return reportQuery({
+        dsId: getDataSourceId(state),
+        tableName: getTable(state),
+        columns: columns,
+    });
+
+};
 
 // const getVisibleDataSource = (state) => {
 //     return state.dataSources[state.visibleDataSource];
 // }
+
+const updateQueryData = (state, columns, rows) => {
+    return updateVisibleDataSource(state, ["data"], (_) => {
+        return {
+            columns: columns,
+            rows: rows
+        };
+    });
+};
 
 const removeQueryColumn = (state, {columnKey}) => {
     return updateVisibleDataSource(state, ['selectedColumns'], cols => {
@@ -74,6 +106,12 @@ const addQueryColumn = (state, {columnKey}) => {
         const cols2 = cols ? cols : [];
         return [...new Set([...cols2, columnKey])]
     });
+};
+
+const setLoadingRowsFlag = (state, isLoading) => {
+    const newState = Object.assign({}, state);
+    newState.loadingFlags.loadingRows = isLoading;
+    return newState;
 };
 
 const setDataSourcesLoadingFlag = (state, isLoading) => {
@@ -105,18 +143,18 @@ const updateCreateReport = (state, {dsKey, tableName}) => {
     const newState = Object.assign({}, state);
 
     let newCreateReport = newState.createReport;
-    if(!newCreateReport) {
+    if (!newCreateReport) {
         newCreateReport = {};
     }
 
     newState.createReport = newCreateReport;
 
-    if(dsKey) {
+    if (dsKey) {
         newCreateReport.selectedDataSource = dsKey;
         newCreateReport.selectedTable = "";
     }
 
-    if(tableName) {
+    if (tableName) {
         newCreateReport.selectedTable = tableName;
     }
 
@@ -155,17 +193,40 @@ const datasourcesReducer = (state = initState, action) => {
         case DATA_SOURCE_LOADED: {
             return state;
         }
-        case ROWS_LOAD: {
-            return state;
+        case REPORT_QUERY_ROWS_LOADED: {
+            return doReportQueryRowsLoaded(setLoadingRowsFlag(state, false), action);
         }
-        case ROWS_LOADED: {
-            return state;
+        case REPORT_QUERY_POLL: {
+            //poll the report query
+            action.dispatch(reportQueryPoll(action));
+            return setLoadingRowsFlag(state, true);
         }
         case QUERY_COLUMN_ADD: {
-            return addQueryColumn(state, action);
+            let newState = addQueryColumn(state, action);
+
+            if (action.doReportQuery) {
+
+                newState = setLoadingRowsFlag(newState, true);
+                action.dispatch(doReportQuery(newState));
+            }
+
+            return newState;
         }
         case QUERY_COLUMN_REMOVE: {
-            return removeQueryColumn(state, action);
+            let newState = removeQueryColumn(state, action);
+
+            if (action.doReportQuery) {
+                const columns = getSelectedColumns(newState);
+                if(!(columns && columns.length > 0 )) {
+                    newState = setLoadingRowsFlag(newState, false);
+                    newState = doReportQueryRowsLoaded(newState, {columns: [], rows: []});
+                } else {
+                    newState = setLoadingRowsFlag(newState, true);
+                    action.dispatch(doReportQuery(newState));
+                }
+            }
+
+            return newState;
         }
         default:
             return state;

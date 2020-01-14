@@ -2,7 +2,12 @@ import React from 'react';
 import 'react-bulma-components/dist/react-bulma-components.min.css';
 import 'bulma-helpers/css/bulma-helpers.min.css';
 
-import {getDataSourceStateFromStore, getShowableColumns, getSelectedColumns, getData} from '../../store/selectors/selectors';
+import {
+    getDataSourceStateFromStore,
+    getShowableColumns,
+    getSelectedColumns,
+    getData
+} from '../../store/selectors/selectors';
 import {addQueryColumn, removeQueryColumn} from '../../store/actions';
 
 import './Editor.css';
@@ -14,6 +19,7 @@ import TableArea from "./TableArea";
 import ColumnListArea from "../column/ColumnListArea";
 import {DragItemTypes} from "../utils/Constants";
 import {connect} from "react-redux";
+
 
 const BuilderArea = ({
                          columnListAcceptNewQueryColumn,
@@ -78,6 +84,9 @@ const BuilderArea = ({
 class Editor extends React.Component {
 
     render() {
+
+        console.log("Editor.render: this.props.queryColumns");
+        console.log(this.props);
         return (
             <div className="container">
                 <DndProvider backend={HTML5Backend}>
@@ -104,6 +113,9 @@ const mapStateToProps = store => {
     console.log("Editor.mapSTateToProps");
     console.log(state);
 
+    console.log(">>>>>>>>> getSelectedColumns ");
+    console.log(getSelectedColumns(state));
+
 
     return {
         columns: getShowableColumns(state),
@@ -114,8 +126,11 @@ const mapStateToProps = store => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        tableAreaAcceptNewQueryColumn: column => dispatch(addQueryColumn(column.key)),
-        columnListAcceptNewQueryColumn: column => dispatch(removeQueryColumn(column.key)),
+        tableAreaAcceptNewQueryColumn: (column) => {
+            dispatch(addQueryColumn(column.key, true, dispatch));}
+        ,
+        columnListAcceptNewQueryColumn: (column, reportQueryPayload={}) => {
+            dispatch(removeQueryColumn(column.key, true, dispatch));}
     };
 };
 

@@ -1,7 +1,6 @@
 /*
  Action Types
  */
-
 import {query} from "./graphql";
 import {transLoadDataSourcesResponse} from "./transformers";
 
@@ -19,9 +18,8 @@ export const DATA_SOURCE_LOADED = "DATA_SOURCE_LOADED";
 export const DATA_SOURCE_LOAD_ERROR = "DATA_SOURCE_LOAD_ERROR";
 
 // Loading data for a data source i.e rows for a query
-export const ROWS_LOAD = "ROWS_LOAD";
-export const ROWS_LOADED = "ROWS_LOADED";
-export const ROWS_LOAD_ERROR = "ROWS_LOAD_ERROR";
+export const REPORT_QUERY_POLL = "REPORT_QUERY_POLL";
+export const REPORT_QUERY_ROWS_LOADED = "REPORT_QUERY_ROWS_LOADED";
 
 export const QUERY_COLUMN_ADD = "QUERY_COLUMN_ADD";
 export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
@@ -29,6 +27,11 @@ export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
 /*
  Action creators
  */
+export const queryReportLoaded = (columns, rows) => ({
+        type: REPORT_QUERY_ROWS_LOADED,
+        columns: columns,
+        rows: rows,
+    });
 
 export const reportCreateSelectDataSource = (dsKey) => (
     {
@@ -42,14 +45,19 @@ export const reportCreateSelectTable = (tblName) => (
         tableName: tblName,
     });
 
-export const addQueryColumn = (columnKey) => ({
+// will cause the report data to be reloaded
+export const addQueryColumn = (columnKey, doReportQuery, dispatch) => ({
     type: QUERY_COLUMN_ADD,
     columnKey: columnKey,
+    doReportQuery: doReportQuery,
+    dispatch: dispatch,
 });
-
-export const removeQueryColumn = (columnKey) => ({
+// will cause the report data to be reloaded
+export const removeQueryColumn = (columnKey, doReportQuery, dispatch) => ({
     type: QUERY_COLUMN_REMOVE,
     columnKey: columnKey,
+    doReportQuery: doReportQuery,
+    dispatch: dispatch,
 });
 
 // load data source ids and names
@@ -119,24 +127,4 @@ export const dataSourceLoaded = (dsId, columns) => ({
     type: DATA_SOURCE_LOADED,
     dsId: dsId,
     columns: columns, // [ {key: <str>, name: <str> }]
-})
-
-// load the data based on a
-export const loadDataSourceRows = (dsId, columnsKeys) => ({
-    type: ROWS_LOAD,
-    dsId: dsId,
-    columns: columnsKeys, // [key1, key2, ... ]
-});
-
-export const dataSourceRowsLoaded = (dsId, columns, rows) => ({
-    type: ROWS_LOADED,
-    dsId: dsId,
-    columns: columns, // [ col1, col2, ... ]
-    rows: rows, // [ [v1, v2, ... ] ]
-});
-
-export const loadDataSourceRowsError = (dsId, error) => ({
-    type: ROWS_LOAD_ERROR,
-    dsId: dsId,
-    error: error,
 });
