@@ -20,6 +20,7 @@ export const DATA_SOURCE_LOAD_ERROR = "DATA_SOURCE_LOAD_ERROR";
 // Loading data for a data source i.e rows for a query
 export const REPORT_QUERY_POLL = "REPORT_QUERY_POLL";
 export const REPORT_QUERY_ROWS_LOADED = "REPORT_QUERY_ROWS_LOADED";
+export const REPORT_QUERY_ROWS_LOADED_ERROR = "REPORT_QUERY_ROWS_LOADED_ERROR";
 
 export const QUERY_COLUMN_ADD = "QUERY_COLUMN_ADD";
 export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
@@ -28,10 +29,16 @@ export const QUERY_COLUMN_REMOVE = "QUERY_COLUMN_REMOVE";
  Action creators
  */
 export const queryReportLoaded = (columns, rows) => ({
-        type: REPORT_QUERY_ROWS_LOADED,
-        columns: columns,
-        rows: rows,
-    });
+    type: REPORT_QUERY_ROWS_LOADED,
+    columns: columns,
+    rows: rows,
+});
+
+export const queryReportLoadError = (msg) => ({
+    type: REPORT_QUERY_ROWS_LOADED_ERROR,
+    status: "ERROR",
+    msg: msg,
+});
 
 export const reportCreateSelectDataSource = (dsKey) => (
     {

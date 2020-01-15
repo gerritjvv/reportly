@@ -9,6 +9,7 @@ import {
     CREATE_REPORT_SELECT_TABLE,
     REPORT_QUERY_POLL,
     REPORT_QUERY_ROWS_LOADED,
+    REPORT_QUERY_ROWS_LOADED_ERROR
 } from '../actions';
 
 import {
@@ -23,6 +24,7 @@ const initState =
         createReport: {
             selectedDataSource: "",
             selectedTable: "",
+            loadingRowsStatus: {status: "", msg: ""}
         },
 
         visibleDataSource: "default",
@@ -114,6 +116,12 @@ const setLoadingRowsFlag = (state, isLoading) => {
     return newState;
 };
 
+const setCreateReportLoadingRowsStatus = (state, status, msg) => {
+    const newState = Object.assign({}, state);
+    newState.createReport.loadingRowsStatus = {status: status, msg: msg};
+    return newState;
+};
+
 const setDataSourcesLoadingFlag = (state, isLoading) => {
     const newState = Object.assign({}, state);
     newState.loadingFlags.loadingDataSources = isLoading;
@@ -196,6 +204,9 @@ const datasourcesReducer = (state = initState, action) => {
         case REPORT_QUERY_ROWS_LOADED: {
             return doReportQueryRowsLoaded(setLoadingRowsFlag(state, false), action);
         }
+        case REPORT_QUERY_ROWS_LOADED_ERROR: {
+            return setDataSourcesLoadingFlag(setCreateReportLoadingRowsStatus(state, action.status, action.msg), false);
+        }
         case REPORT_QUERY_POLL: {
             //poll the report query
             action.dispatch(reportQueryPoll(action));
@@ -206,7 +217,7 @@ const datasourcesReducer = (state = initState, action) => {
 
             if (action.doReportQuery) {
 
-                newState = setLoadingRowsFlag(newState, true);
+                newState = setCreateReportLoadingRowsStatus(setLoadingRowsFlag(newState, true), {status: "", msg: ""});
                 action.dispatch(doReportQuery(newState));
             }
 
@@ -217,7 +228,7 @@ const datasourcesReducer = (state = initState, action) => {
 
             if (action.doReportQuery) {
                 const columns = getSelectedColumns(newState);
-                if(!(columns && columns.length > 0 )) {
+                if (!(columns && columns.length > 0)) {
                     newState = setLoadingRowsFlag(newState, false);
                     newState = doReportQueryRowsLoaded(newState, {columns: [], rows: []});
                 } else {

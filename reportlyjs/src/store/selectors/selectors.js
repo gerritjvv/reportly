@@ -16,6 +16,10 @@ export const isLoadingDataSources = (state) => {
     return state.loadingFlags.loadingDataSources;
 };
 
+export const isLoadingRows = (state) => {
+    return state.loadingFlags.loadingRows;
+};
+
 /**
  * Return a virtual datasource for the query editor
  *  it contains selectedColumns, data:{:columns, rows:}, and columns}

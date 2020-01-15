@@ -6,7 +6,8 @@ import {
     getDataSourceStateFromStore,
     getShowableColumns,
     getSelectedColumns,
-    getData
+    getData,
+    isLoadingRows
 } from '../../store/selectors/selectors';
 import {addQueryColumn, removeQueryColumn} from '../../store/actions';
 
@@ -19,9 +20,12 @@ import TableArea from "./TableArea";
 import ColumnListArea from "../column/ColumnListArea";
 import {DragItemTypes} from "../utils/Constants";
 import {connect} from "react-redux";
+import {getCreateReportLoadingRowsStatus} from "../../store/selectors/createreportSelectors";
 
 
 const BuilderArea = ({
+                         loadingRowsStatus,
+                         isLoadingRows,
                          columnListAcceptNewQueryColumn,
                          columns,
                          queryColumns,
@@ -48,9 +52,16 @@ const BuilderArea = ({
     dropRefs = useDrop({
         accept: DragItemTypes.QUERY_COLUMN,
         drop: (v) => {
+            if(isLoadingRows) {
+                return false;
+            }
             tableAreaAcceptNewQueryColumn(v.column);
         },
         canDrop: (v, monitor) => {
+            if(isLoadingRows) {
+                return false;
+            }
+
             return columns.find(i => i.key === v.column.key)
         },
         collect: monitor => ({
@@ -59,7 +70,33 @@ const BuilderArea = ({
         }),
     });
 
-    const tableAreaDrop = dropRefs[1];
+    let tableAreaDrop = dropRefs[1];
+
+    let tableArea = <TableArea data={data}/>;
+
+    const {status, msg} = loadingRowsStatus;
+
+    if (isLoadingRows) {
+        tableArea = (
+            <div className="level">
+                <p className="level-item has-text-centered">
+                    <button className="button is-loading">Loading Data Sources</button>
+                </p>
+
+            </div>);
+    }
+    if(status === "ERROR") {
+        tableArea = (
+            <div className="notification is-danger">
+                <p>
+                    Error Loading data from for the Data Source.
+                </p>
+                <p>
+                    {JSON.stringify(msg)}
+                </p>
+            </div>
+        );
+    }
 
     return (<div className="tile is-ancestor has-min-height-350">
         <div ref={columnListAreaDrop}
@@ -74,12 +111,12 @@ const BuilderArea = ({
                 ref={tableAreaDrop}
                 className="tile is-child box">
                 <QueryColumns columns={queryColumns}/>
-                <TableArea data={data}/>
+                {tableArea}
             </div>
         </div>
 
     </div>);
-}
+};
 
 class Editor extends React.Component {
 
@@ -91,6 +128,8 @@ class Editor extends React.Component {
             <div className="container">
                 <DndProvider backend={HTML5Backend}>
                     <BuilderArea
+                        loadingRowsStatus={this.props.loadingRowsStatus}
+                        isLoadingRows={this.props.isLoadingRows}
                         tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
                         columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
                         queryColumns={this.props.queryColumns}
@@ -110,14 +149,11 @@ const mapStateToProps = store => {
 
     const state = getDataSourceStateFromStore(store);
 
-    console.log("Editor.mapSTateToProps");
-    console.log(state);
-
-    console.log(">>>>>>>>> getSelectedColumns ");
-    console.log(getSelectedColumns(state));
-
-
+    console.log(">>>>>>>>>> Editor mapStateToProps");
+    console.log(getCreateReportLoadingRowsStatus(state));
     return {
+        loadingRowsStatus: getCreateReportLoadingRowsStatus(state),
+        isLoadingRows: isLoadingRows(state),
         columns: getShowableColumns(state),
         queryColumns: getSelectedColumns(state),
         data: getData(state),
@@ -127,10 +163,12 @@ const mapStateToProps = store => {
 const mapDispatchToProps = dispatch => {
     return {
         tableAreaAcceptNewQueryColumn: (column) => {
-            dispatch(addQueryColumn(column.key, true, dispatch));}
+            dispatch(addQueryColumn(column.key, true, dispatch));
+        }
         ,
-        columnListAcceptNewQueryColumn: (column, reportQueryPayload={}) => {
-            dispatch(removeQueryColumn(column.key, true, dispatch));}
+        columnListAcceptNewQueryColumn: (column) => {
+            dispatch(removeQueryColumn(column.key, true, dispatch));
+        }
     };
 };
 

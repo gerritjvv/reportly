@@ -9,6 +9,10 @@ export const getCreateReportSelectedTableName = (state) => {
     return ds ? state.createReport.selectedTable : "";
 };
 
+export const getCreateReportLoadingRowsStatus = (state) => {
+    return state.createReport.loadingRowsStatus;
+};
+
 export const getCreateReportSelectedDS = (state) => {
     const dsName = getCreateReportSelectedDSName(state);
 

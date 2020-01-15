@@ -1,11 +1,10 @@
 import {query} from "../graphql";
 import uuid from "uuid";
-import {queryReportLoaded, REPORT_QUERY_POLL} from "../actions";
+import {queryReportLoaded, queryReportLoadError, REPORT_QUERY_POLL} from "../actions";
 import {sleep} from "../../tool/utils/libs";
 
 
 export const reportQueryPoll = ({id}) => {
-    console.log("1 reportQueryPoll >>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
     return (dispatch) => {
 
@@ -33,6 +32,7 @@ export const reportQueryPoll = ({id}) => {
                 }));
             } else if (status === "ERROR"){
                 console.log("ERROR");
+                dispatch(queryReportLoadError(msg));
             }
             else {
                 dispatch(queryReportLoaded(columns, rows));
@@ -41,10 +41,7 @@ export const reportQueryPoll = ({id}) => {
         }).catch(reason => {
             console.log("ERROR POLLING");
             console.log(reason);
-            // dispatch({
-            //     type: ROWS_LOADED,
-            //     dataSources: {}
-            // });
+            dispatch(queryReportLoadError(reason));
         });
     };
 };
@@ -52,15 +49,12 @@ export const reportQueryPoll = ({id}) => {
 // load the data based on a
 // columns must contain: {:key :name: :as_name :type}
 export const reportQuery = ({dsId, tableName, columns}) => {
-    console.log("1 reportQuery>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
     return (dispatch) => {
 
         //call datasources
         const id = uuid.v4();
         const columnsJson = JSON.stringify(columns).replace(/"([^(")"]+)":/g,"$1:");
-
-        console.log("2 reportQuery>>>>>>>>>>>>>>>>>>>>>>>>>>>>> : " + columnsJson);
 
         query(`
     query {
@@ -92,10 +86,7 @@ export const reportQuery = ({dsId, tableName, columns}) => {
         }).catch(reason => {
             console.log("ERROR REPORT_QUERY_POLL");
             console.log(reason);
-            // dispatch({
-            //     type: ROWS_LOADED,
-            //     dataSources: {}
-            // });
+            dispatch(queryReportLoadError(reason));
         });
     };
 
