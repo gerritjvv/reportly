@@ -44,9 +44,6 @@ const renderHeader = (columns) => {
 // stored as {"id" {name "name" ...}}
 const DataSources = ({dataSources}) => {
 
-    console.log("dAtasources: ");
-    console.log(dataSources);
-
     return (
         <div className="table-container is-full-width">
             <table className="table is-bordered is-striped is-narrow is-scrollable is-hoverable is-fullwidth"

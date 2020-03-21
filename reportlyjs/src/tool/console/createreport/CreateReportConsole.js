@@ -61,10 +61,11 @@ class CreateReportConsole extends React.Component {
                     </thead>
                     <tbody>
                     {Object.keys(dataSources).map(dsKey => {
+                        const name = dataSources[dsKey].name
                         return (
                             <tr key={dsKey}>
                                 <td>
-                                    <button className="button has-text-link is-borderless" onClick={ () => this.selectDataSource(dsKey)}>{dsKey}</button>
+                                    <button className="button has-text-link is-borderless" onClick={ () => this.selectDataSource(dsKey)}>{name}</button>
                                 </td>
                             </tr>
                         );

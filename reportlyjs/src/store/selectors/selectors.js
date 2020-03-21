@@ -20,6 +20,10 @@ export const isLoadingRows = (state) => {
     return state.loadingFlags.loadingRows;
 };
 
+export const isSavingReport = (state) => {
+    return state.loadingFlags.savingReport;
+};
+
 /**
  * Return a virtual datasource for the query editor
  *  it contains selectedColumns, data:{:columns, rows:}, and columns}

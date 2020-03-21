@@ -7,9 +7,9 @@ import {
     getShowableColumns,
     getSelectedColumns,
     getData,
-    isLoadingRows
+    isLoadingRows, getTable, getDataSourceId, isSavingReport
 } from '../../store/selectors/selectors';
-import {addQueryColumn, removeQueryColumn} from '../../store/actions';
+import {addQueryColumn, removeQueryColumn, REPORT_SAVING, saveReport} from '../../store/actions';
 
 import './Editor.css';
 
@@ -20,7 +20,10 @@ import TableArea from "./TableArea";
 import ColumnListArea from "../column/ColumnListArea";
 import {DragItemTypes} from "../utils/Constants";
 import {connect} from "react-redux";
-import {getCreateReportLoadingRowsStatus} from "../../store/selectors/createreportSelectors";
+import {
+    getCreateReportLoadingRowsStatus,
+    getCreateReportSavingReportStatus
+} from "../../store/selectors/createreportSelectors";
 
 
 const BuilderArea = ({
@@ -52,13 +55,13 @@ const BuilderArea = ({
     dropRefs = useDrop({
         accept: DragItemTypes.QUERY_COLUMN,
         drop: (v) => {
-            if(isLoadingRows) {
+            if (isLoadingRows) {
                 return false;
             }
             tableAreaAcceptNewQueryColumn(v.column);
         },
         canDrop: (v, monitor) => {
-            if(isLoadingRows) {
+            if (isLoadingRows) {
                 return false;
             }
 
@@ -85,7 +88,7 @@ const BuilderArea = ({
 
             </div>);
     }
-    if(status === "ERROR") {
+    if (status === "ERROR") {
         tableArea = (
             <div className="notification is-danger">
                 <p>
@@ -120,23 +123,80 @@ const BuilderArea = ({
 
 class Editor extends React.Component {
 
+    state = {reportName: ""}
+
+    onReportNameEdit = (evt) => {
+        this.setState({reportName: evt.target.value});
+    };
+
+    saveReport = () => {
+
+        const payload = {
+            dataSourceId: this.props.dataSourceId,
+            tableName: this.props.table,
+            columns: this.props.queryColumns,
+        };
+
+        this.props.saveReport(payload);
+
+    };
+
     render() {
 
-        console.log("Editor.render: this.props.queryColumns");
-        console.log(this.props);
+        const reportName = this.state.reportName;
+        const canSave = reportName.trim().length > 0;
+
+        let saveBtnCls = ["button", "is-info"];
+
+        if (!canSave) {
+            saveBtnCls.push("is-static");
+        }
+
+        if (this.props.isSavingReport) {
+            saveBtnCls.push("is-loading");
+        }
+
+        const savingReportStatus = this.props.savingReportStatus;
+
+        if(savingReportStatus && savingReportStatus.status == "ERROR") {
+            console.log(">>>>>> error msg");
+        }
+        console.log("---- editor: status " + savingReportStatus);
+
         return (
-            <div className="container">
-                <DndProvider backend={HTML5Backend}>
-                    <BuilderArea
-                        loadingRowsStatus={this.props.loadingRowsStatus}
-                        isLoadingRows={this.props.isLoadingRows}
-                        tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
-                        columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
-                        queryColumns={this.props.queryColumns}
-                        columns={this.props.columns}
-                        data={this.props.data}
-                    />
-                </DndProvider>
+            <div>
+                <div className="container">
+                    <div className="container">
+                        <div className="field has-addons has-margin-bottom-10">
+                            <div className="control">
+                                <input className="input"
+                                       value={reportName}
+                                       onChange={this.onReportNameEdit}
+                                       type="text" placeholder="[Report Name]"/>
+                            </div>
+                            <div className="control">
+                                <button className={saveBtnCls.join(" ")}
+                                        onClick={this.saveReport}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="container">
+                        <DndProvider backend={HTML5Backend}>
+                            <BuilderArea
+                                loadingRowsStatus={this.props.loadingRowsStatus}
+                                isLoadingRows={this.props.isLoadingRows}
+                                tableAreaAcceptNewQueryColumn={this.props.tableAreaAcceptNewQueryColumn}
+                                columnListAcceptNewQueryColumn={this.props.columnListAcceptNewQueryColumn}
+                                queryColumns={this.props.queryColumns}
+                                columns={this.props.columns}
+                                data={this.props.data}
+                            />
+                        </DndProvider>
+                    </div>
+                </div>
             </div>
         )
             ;
@@ -149,11 +209,14 @@ const mapStateToProps = store => {
 
     const state = getDataSourceStateFromStore(store);
 
-    console.log(">>>>>>>>>> Editor mapStateToProps");
-    console.log(getCreateReportLoadingRowsStatus(state));
     return {
+        dataSourceId: getDataSourceId(state),
+        table: getTable(state),
+
+        savingReportStatus: getCreateReportSavingReportStatus(state),
         loadingRowsStatus: getCreateReportLoadingRowsStatus(state),
         isLoadingRows: isLoadingRows(state),
+        isSavingReport: isSavingReport(state),
         columns: getShowableColumns(state),
         queryColumns: getSelectedColumns(state),
         data: getData(state),
@@ -162,6 +225,10 @@ const mapStateToProps = store => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        saveReport: (payload) => {
+            dispatch({type: REPORT_SAVING});
+            dispatch(saveReport(payload));
+        },
         tableAreaAcceptNewQueryColumn: (column) => {
             dispatch(addQueryColumn(column.key, true, dispatch));
         }

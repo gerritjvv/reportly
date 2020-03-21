@@ -13,6 +13,10 @@ export const getCreateReportLoadingRowsStatus = (state) => {
     return state.createReport.loadingRowsStatus;
 };
 
+export const getCreateReportSavingReportStatus = (state) => {
+    return state.createReport.savingReportStatus;
+};
+
 export const getCreateReportSelectedDS = (state) => {
     const dsName = getCreateReportSelectedDSName(state);
 

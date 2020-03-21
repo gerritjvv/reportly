@@ -118,23 +118,30 @@
 
 
  :input-objects {
-                 :ColumnInput {:fields {:key     {:type String}
-                                        :name    {:type String}
-                                        :type    {:type String}
-                                        :as_name {:type String}}}
+                 :ColumnInput       {:fields {:key     {:type String}
+                                              :name    {:type String}
+                                              :type    {:type String}
+                                              :as_name {:type String}}}
 
-                 :TableInput {:fields {:name    {:type String}
-                                       :columns {:type        (list :ColumnInput)
-                                                 :description "Columns for a table"}}}
+                 :TableInput        {:fields {:name    {:type String}
+                                              :columns {:type        (list :ColumnInput)
+                                                        :description "Columns for a table"}}}
 
                  :DataRequest       {:fields {:data_source_id {:type String}
                                               :tables         {:type (list :TableInput)}}}
 
+                 ;; a dynamic or pre-saved report
                  :ReportQuery       {
                                      :fields {:report_request {:type :DataRequest}
                                               :report_id      {:type String}
-
                                               }
+                                     }
+
+                 ;; a report that is saved and can be re-run
+                 :Report            {
+                                     :fields {:report_id      {:type String} ;; when updating use a id
+                                              :report_name    {:type String}
+                                              :report_request {:type :DataRequest}}
                                      }
 
                  :DBDataSourceInput {:fields {:name     {:type String}
@@ -161,5 +168,14 @@
                   :description "Save a datasource"
                   :resolve     :mutations/save-db-data-source
                   }
+
+                 :save_report
+                 {:type        :report
+                  :args        {
+                                :report {:type :Report}
+                                }
+
+                  :description "Save a report"
+                  :resolve     :mutations/save-report}
                  }
  }

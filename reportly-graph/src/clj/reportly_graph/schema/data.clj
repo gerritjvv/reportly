@@ -7,6 +7,7 @@
 (s/def ::as_name string?)
 
 (s/def ::report_id string?)
+(s/def ::report_name string?)
 
 (s/def ::data_source_id string?)
 
@@ -33,6 +34,10 @@
                            [::report_id
                             ::report_request]))
 
+(s/def ::UpdateReport (s/keys :req-un
+                              [::report_id
+                               ::report_name
+                               ::report_request]))
 (comment
 
   (def ValidReportQuery {

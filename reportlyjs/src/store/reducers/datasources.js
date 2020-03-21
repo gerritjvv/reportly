@@ -9,7 +9,7 @@ import {
     CREATE_REPORT_SELECT_TABLE,
     REPORT_QUERY_POLL,
     REPORT_QUERY_ROWS_LOADED,
-    REPORT_QUERY_ROWS_LOADED_ERROR
+    REPORT_QUERY_ROWS_LOADED_ERROR, REPORT_SAVING, REPORT_SAVED
 } from '../actions';
 
 import {
@@ -122,6 +122,19 @@ const setCreateReportLoadingRowsStatus = (state, status, msg) => {
     return newState;
 };
 
+const setCreateReportSavingStatus = (state, status, msg) => {
+    const newState = Object.assign({}, state);
+    newState.createReport.savingReportStatus = {status: status, msg: msg};
+    return newState;
+};
+
+
+const setCreateReportSavingLoadingFlag = (state, isLoading) => {
+    const newState = Object.assign({}, state);
+    newState.loadingFlags.savingReport = isLoading;
+    return newState;
+};
+
 const setDataSourcesLoadingFlag = (state, isLoading) => {
     const newState = Object.assign({}, state);
     newState.loadingFlags.loadingDataSources = isLoading;
@@ -200,6 +213,12 @@ const datasourcesReducer = (state = initState, action) => {
         }
         case DATA_SOURCE_LOADED: {
             return state;
+        }
+        case REPORT_SAVING: {
+            return setCreateReportSavingLoadingFlag(state, true);
+        }
+        case REPORT_SAVED: {
+            return setCreateReportSavingLoadingFlag(setCreateReportSavingStatus(state, action.status, action.msg), false);
         }
         case REPORT_QUERY_ROWS_LOADED: {
             return doReportQueryRowsLoaded(setLoadingRowsFlag(state, false), action);
